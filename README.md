@@ -19,7 +19,7 @@ task2/
 
 README.md
 
-```bash
+
 
 ##  Компиляция  
 
