@@ -43,7 +43,8 @@ BST removeNode(BST root, unsigned int key) {
     if (!root) return NULL;
 
     if (key < root->key) root->left = removeNode(root->left, key);
-    else if (key > root->key) root->right = removeNode(root->right, key);
+    else if (key > root->key)
+        root->right = removeNode(root->right, key);
     else { // нашли узел
         if (!root->left) {
             Node* temp = root->right;

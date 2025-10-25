@@ -81,16 +81,92 @@ void remove_duplicates_of_last(list *lp) {
     }
 }
 
-int main(void) {
-    list lst = NULL;
-    char word[256];
+void expand_buffer(char **buf, int *size) {
+    int new_size = (*size == 0) ? 16 : *size * 2;
+    char *new_buf = realloc(*buf, new_size);
+    *buf = new_buf;
+    *size = new_size;
+}
 
-    while (scanf("%255s", word) == 1) {
-        append(&lst, word);
+// Проверка на пробельный символ
+int is_space(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
+
+// Чтение слова с динамическим выделением памяти
+char* read_word_dynamic(const char **input) {
+    const char *p = *input;
+
+    // Пропускаем пробелы
+    while (*p != '\0' && is_space(*p)) {
+        p++;
     }
 
-    remove_duplicates_of_last(&lst);
+    if (*p == '\0') return NULL;
+
+    // Читаем слово
+    char *word = NULL;
+    int size = 0, len = 0;
+
+    while (*p != '\0' && !is_space(*p)) {
+        if (len + 1 >= size)
+            expand_buffer(&word, &size);
+        word[len++] = *p;
+        p++;
+    }
+
+    if (word) {
+        if (len + 1 >= size)
+            expand_buffer(&word, &size);
+        word[len] = '\0';
+    }
+
+    *input = p; // Обновляем позицию в строке
+    return word;
+}
+
+int main(void) {
+    printf("Введите строку: ");
+
+    // Читаем всю строку
+    char *input = NULL;
+    int size = 0, len = 0;
+    int c;
+
+    while ((c = getchar()) != EOF && c != '\n') {
+        if (len + 1 >= size)
+            expand_buffer(&input, &size);
+        input[len++] = (char)c;
+    }
+
+    if (input) {
+        if (len + 1 >= size)
+            expand_buffer(&input, &size);
+        input[len] = '\0';
+    } else {
+        input = strdup("");
+    }
+
+    // Разбираем строку на слова и строим список
+    list lst = NULL;
+    const char *pos = input;
+
+    while (1) {
+        char *word = read_word_dynamic(&pos);
+        if (word == NULL) break;
+
+        append(&lst, word);
+        free(word);
+    }
+
+    if (lst != NULL) {
+        remove_duplicates_of_last(&lst);
+    }
+
     print(lst);
     destruct(lst);
+    free(input);
+
     return 0;
 }
+

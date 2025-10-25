@@ -7,8 +7,11 @@ double str2double(char str[]){
 
     while (str[i] == ' ' || str[i] == '\t') i++;
 
-    if (str[i] == '-') {sign = -1, i++;}
-    else if (str[i] == '+') i++;
+    if (str[i] == '-')
+    {sign = -1,
+        i++;}
+    else if (str[i] == '+')
+        i++;
 
     //обработка целой части
     while (str[i] >='0' && str[i] <= '9'){

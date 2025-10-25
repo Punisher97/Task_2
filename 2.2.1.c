@@ -11,4 +11,5 @@ int main(){
         res = res*x + coef;
     }
     printf("%lf", res);
+return 0;
 }
