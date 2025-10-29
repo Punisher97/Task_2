@@ -81,92 +81,48 @@ void remove_duplicates_of_last(list *lp) {
     }
 }
 
-void expand_buffer(char **buf, int *size) {
-    int new_size = (*size == 0) ? 16 : *size * 2;
-    char *new_buf = realloc(*buf, new_size);
-    *buf = new_buf;
-    *size = new_size;
-}
+char* read_line_dynamic(void) {
+    size_t cap = 256;
+    char *buf = (char*)malloc(cap);
 
-// Проверка на пробельный символ
-int is_space(char c) {
-    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-}
+    size_t len = 0;
+    int ch;
 
-// Чтение слова с динамическим выделением памяти
-char* read_word_dynamic(const char **input) {
-    const char *p = *input;
-
-    // Пропускаем пробелы
-    while (*p != '\0' && is_space(*p)) {
-        p++;
+    while ((ch = getchar()) != EOF && ch != '\n') {
+        if (len + 1 >= cap) {
+            size_t ncap = cap * 2;
+            char *tmp = (char*)realloc(buf, ncap);
+            buf = tmp;
+            cap = ncap;
+        }
+        buf[len++] = (char)ch;
     }
 
-    if (*p == '\0') return NULL;
-
-    // Читаем слово
-    char *word = NULL;
-    int size = 0, len = 0;
-
-    while (*p != '\0' && !is_space(*p)) {
-        if (len + 1 >= size)
-            expand_buffer(&word, &size);
-        word[len++] = *p;
-        p++;
-    }
-
-    if (word) {
-        if (len + 1 >= size)
-            expand_buffer(&word, &size);
-        word[len] = '\0';
-    }
-
-    *input = p; // Обновляем позицию в строке
-    return word;
+    buf[len] = '\0';
+    return buf;
 }
 
 int main(void) {
-    printf("Введите строку: ");
+    list head = NULL;
 
-    // Читаем всю строку
-    char *input = NULL;
-    int size = 0, len = 0;
-    int c;
+    char *line = read_line_dynamic();
 
-    while ((c = getchar()) != EOF && c != '\n') {
-        if (len + 1 >= size)
-            expand_buffer(&input, &size);
-        input[len++] = (char)c;
+    // Разбиваем строку на слова и добавляем в список
+    char *token = strtok(line, " \t");
+    while (token != NULL) {
+        append(&head, token);
+        token = strtok(NULL, " \t");
     }
 
-    if (input) {
-        if (len + 1 >= size)
-            expand_buffer(&input, &size);
-        input[len] = '\0';
+    free(line);
+
+    if (head) {
+        remove_duplicates_of_last(&head);
+        print(head);
     } else {
-        input = strdup("");
+        putchar('\n');
     }
 
-    // Разбираем строку на слова и строим список
-    list lst = NULL;
-    const char *pos = input;
-
-    while (1) {
-        char *word = read_word_dynamic(&pos);
-        if (word == NULL) break;
-
-        append(&lst, word);
-        free(word);
-    }
-
-    if (lst != NULL) {
-        remove_duplicates_of_last(&lst);
-    }
-
-    print(lst);
-    destruct(lst);
-    free(input);
-
+    destruct(head);
     return 0;
 }
-
